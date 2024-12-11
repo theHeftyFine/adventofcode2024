@@ -53,9 +53,10 @@ func Widget(filename string) *fyne.Container {
 		_, _, routes := part(input)
 		rects := drawRectangles(input)
 		mapContainer.Add(fillWithRects(rects, len(input)))
-
 		for _, route := range routes {
-			simulateRoute(rects, route, input)
+			go func() {
+				simulateRoute(rects, route, input)
+			}()
 		}
 	})
 

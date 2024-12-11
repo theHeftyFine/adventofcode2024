@@ -1,14 +1,16 @@
 package main
 
 import (
+	"fmt"
+	"log"
 	"strconv"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
 	"fyne.io/fyne/v2/container"
-	"fyne.io/fyne/v2/widget"
 	"github.com/theheftyfine/adventofcode2024/day1"
 	"github.com/theheftyfine/adventofcode2024/day10"
+	"github.com/theheftyfine/adventofcode2024/day11"
 	"github.com/theheftyfine/adventofcode2024/day2"
 	"github.com/theheftyfine/adventofcode2024/day3"
 	"github.com/theheftyfine/adventofcode2024/day4"
@@ -17,6 +19,7 @@ import (
 	"github.com/theheftyfine/adventofcode2024/day7"
 	"github.com/theheftyfine/adventofcode2024/day8"
 	"github.com/theheftyfine/adventofcode2024/day9"
+	"golang.design/x/clipboard"
 )
 
 var screens = []*fyne.Container{
@@ -29,22 +32,29 @@ var screens = []*fyne.Container{
 	day7.Widget("input/input7.txt"),
 	day8.Widget("input/input8.txt"),
 	day9.Widget("input/input9.txt"),
-	day10.Widget("input/input10a.txt"),
+	day10.Widget("input/input10.txt"),
+	day11.Widget("input/input11.txt"),
 }
 
 func main() {
+	err := clipboard.Init()
+	if err != nil {
+		log.Panic(err)
+	}
 
 	a := app.New()
 	w := a.NewWindow("Advent of Code 2024")
 	w.Resize(fyne.NewSize(800, 600))
-
-	resultLabel := widget.NewLabel("")
-
 	content := container.NewAppTabs()
 	for i, s := range screens {
 		content.Append(container.NewTabItem("Day "+strconv.Itoa(i+1), s))
 	}
-	rows := container.NewVBox(content, resultLabel)
+	rows := container.NewVBox(content)
 	w.SetContent(rows)
+	digit, err2 := strconv.Atoi("001")
+	if err2 != nil {
+		log.Fatal(err2)
+	}
+	fmt.Println(digit)
 	w.ShowAndRun()
 }
