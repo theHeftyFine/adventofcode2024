@@ -2,46 +2,48 @@ package day8
 
 import (
 	"bufio"
-	"fmt"
 	"log"
 	"os"
 	"slices"
-	"strconv"
 	"strings"
 
 	"fyne.io/fyne/v2"
-	"fyne.io/fyne/v2/container"
-	"fyne.io/fyne/v2/widget"
+	daydisplay "github.com/theheftyfine/adventofcode2024/display"
 )
 
-func Day8(filename string) {
-	fmt.Println("Day 8:")
-	in := Input(filename)
-	fmt.Println("Part 1:", calcNodes(in, drawPart1))
-	fmt.Println("Part 2:", calcNodes(in, drawPart2))
+type day struct{}
+
+var display = daydisplay.BasicDisplay[[]string]{
+	DayRunner: day{},
 }
 
-func Widget(filename string) *fyne.Container {
-	resultLabel := widget.NewLabel("")
-	input := Input(filename)
-	button1 := widget.NewButton("Part 1", func() {
-		resultLabel.SetText("Result: " + strconv.Itoa(part1(input)))
-	})
-
-	button2 := widget.NewButton("Part 2", func() {
-		resultLabel.SetText("Result: " + strconv.Itoa(part2(input)))
-	})
-
-	buttonRow := container.NewHBox(button1, button2)
-	return container.NewVBox(buttonRow, resultLabel)
+func Display(filename string) *fyne.Container {
+	return display.Widget(filename)
 }
 
-func part1(input []string) int {
+func (day) Part1(input []string, cont *fyne.Container) int {
 	return calcNodes(input, drawPart1)
 }
 
-func part2(input []string) int {
+func (day) Part2(input []string, cont *fyne.Container) int {
 	return calcNodes(input, drawPart2)
+}
+
+func (day) Input(filename string) []string {
+	out := []string{}
+
+	file, err := os.Open(filename)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	scanner := bufio.NewScanner(file)
+
+	for scanner.Scan() {
+		out = append(out, scanner.Text())
+	}
+
+	return out
 }
 
 func calcNodes(in []string, drawFunc func([]string, []int, []int)) int {
@@ -140,23 +142,6 @@ func distance(coordA []int, coordB []int) ([]int, []int) {
 	}
 
 	return vecA, vecB
-}
-
-func Input(filename string) []string {
-	out := []string{}
-
-	file, err := os.Open(filename)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	scanner := bufio.NewScanner(file)
-
-	for scanner.Scan() {
-		out = append(out, scanner.Text())
-	}
-
-	return out
 }
 
 func copyInput(input []string) []string {

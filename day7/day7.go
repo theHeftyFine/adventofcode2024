@@ -2,15 +2,13 @@ package day7
 
 import (
 	"bufio"
-	"fmt"
 	"log"
 	"os"
 	"strconv"
 	"strings"
 
 	"fyne.io/fyne/v2"
-	"fyne.io/fyne/v2/container"
-	"fyne.io/fyne/v2/widget"
+	daydisplay "github.com/theheftyfine/adventofcode2024/display"
 )
 
 type Test struct {
@@ -21,48 +19,25 @@ type Test struct {
 var ops1 = []func(int, int) int{sum, product}
 var ops2 = []func(int, int) int{sum, product, concat}
 
-func Day7(filename string) {
-	fmt.Println("Day 7")
-	input7 := Input(filename)
-	fmt.Println("Part 1:", part1(input7))
-	fmt.Println("Part 2:", part2(input7))
+type day struct{}
+
+var display = daydisplay.BasicDisplay[[]Test]{
+	DayRunner: day{},
 }
 
-func Widget(filename string) *fyne.Container {
-	resultLabel := widget.NewLabel("")
-	input := Input(filename)
-	button1 := widget.NewButton("Part 1", func() {
-		resultLabel.SetText("Result: " + strconv.Itoa(part1(input)))
-	})
-
-	button2 := widget.NewButton("Part 2", func() {
-		resultLabel.SetText("Result: " + strconv.Itoa(part2(input)))
-	})
-
-	buttonRow := container.NewHBox(button1, button2)
-	return container.NewVBox(buttonRow, resultLabel)
+func Display(filename string) *fyne.Container {
+	return display.Widget(filename)
 }
 
-func part1(input []Test) int {
+func (day) Part1(input []Test, cont *fyne.Container) int {
 	return part(input, ops1)
 }
 
-func part2(input []Test) int {
+func (day) Part2(input []Test, cont *fyne.Container) int {
 	return part(input, ops2)
 }
 
-func part(input []Test, ops []func(int, int) int) int {
-	out := 0
-	for _, p := range input {
-		if check(p.sum, p.terms, ops) {
-			out += p.sum
-		}
-	}
-
-	return out
-}
-
-func Input(filename string) []Test {
+func (day) Input(filename string) []Test {
 	out := []Test{}
 	file, err := os.Open(filename)
 	if err != nil {
@@ -90,6 +65,17 @@ func Input(filename string) []Test {
 			out = append(out, test)
 		}
 	}
+	return out
+}
+
+func part(input []Test, ops []func(int, int) int) int {
+	out := 0
+	for _, p := range input {
+		if check(p.sum, p.terms, ops) {
+			out += p.sum
+		}
+	}
+
 	return out
 }
 

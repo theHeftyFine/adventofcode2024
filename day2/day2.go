@@ -2,7 +2,6 @@ package day2
 
 import (
 	"bufio"
-	"fmt"
 	"log"
 	"os"
 	"regexp"
@@ -10,33 +9,20 @@ import (
 	"strconv"
 
 	"fyne.io/fyne/v2"
-	"fyne.io/fyne/v2/container"
-	"fyne.io/fyne/v2/widget"
+	daydisplay "github.com/theheftyfine/adventofcode2024/display"
 )
 
-func Day2(filename string) {
-	fmt.Println("Day 2:")
-	input2 := Input(filename)
-	fmt.Println("Part 1:", part1(input2))
-	fmt.Println("Part 2:", part2(input2))
+type day struct{}
+
+var display = daydisplay.BasicDisplay[[][]int]{
+	DayRunner: day{},
 }
 
-func Widget(filename string) *fyne.Container {
-	resultLabel := widget.NewLabel("")
-	input := Input(filename)
-	button1 := widget.NewButton("Part 1", func() {
-		resultLabel.SetText("Result: " + strconv.Itoa(part1(input)))
-	})
-
-	button2 := widget.NewButton("Part 2", func() {
-		resultLabel.SetText("Result: " + strconv.Itoa(part2(input)))
-	})
-
-	buttonRow := container.NewHBox(button1, button2)
-	return container.NewVBox(buttonRow, resultLabel)
+func Display(filename string) *fyne.Container {
+	return display.Widget(filename)
 }
 
-func part1(input [][]int) int {
+func (day) Part1(input [][]int, cont *fyne.Container) int {
 	var safe = 0
 
 	for _, row := range input {
@@ -48,7 +34,7 @@ func part1(input [][]int) int {
 	return safe
 }
 
-func part2(input [][]int) int {
+func (day) Part2(input [][]int, cont *fyne.Container) int {
 	var safe = 0
 
 	for _, row := range input {
@@ -107,7 +93,7 @@ func splitLevels(levels []int) [][]int {
 	return out
 }
 
-func Input(filename string) [][]int {
+func (day) Input(filename string) [][]int {
 	input := [][]int{}
 
 	file, err := os.Open(filename)

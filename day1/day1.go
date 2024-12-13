@@ -2,7 +2,6 @@ package day1
 
 import (
 	"bufio"
-	"fmt"
 	"log"
 	"math"
 	"os"
@@ -11,8 +10,7 @@ import (
 	"strconv"
 
 	"fyne.io/fyne/v2"
-	"fyne.io/fyne/v2/container"
-	"fyne.io/fyne/v2/widget"
+	daydisplay "github.com/theheftyfine/adventofcode2024/display"
 )
 
 type NumPair struct {
@@ -20,29 +18,17 @@ type NumPair struct {
 	right []int
 }
 
-func Day1(filename string) {
-	fmt.Println("Day 1:")
-	input1 := Input(filename)
-	fmt.Println("Part 1:", part1(input1))
-	fmt.Println("Part 2:", part2(input1))
+type day struct{}
+
+var display = daydisplay.BasicDisplay[NumPair]{
+	DayRunner: day{},
 }
 
-func Widget(filename string) *fyne.Container {
-	resultLabel := widget.NewLabel("")
-	input := Input(filename)
-	button1 := widget.NewButton("Part 1", func() {
-		resultLabel.SetText("Result: " + strconv.Itoa(part1(input)))
-	})
-
-	button2 := widget.NewButton("Part 2", func() {
-		resultLabel.SetText("Result: " + strconv.Itoa(part2(input)))
-	})
-
-	buttonRow := container.NewHBox(button1, button2)
-	return container.NewVBox(buttonRow, resultLabel)
+func Display(filename string) *fyne.Container {
+	return display.Widget(filename)
 }
 
-func part1(input NumPair) int {
+func (day) Part1(input NumPair, cont *fyne.Container) int {
 	var sum int = 0
 	for i, v := range input.left {
 		if len(input.right) > i {
@@ -56,7 +42,7 @@ func part1(input NumPair) int {
 	return sum
 }
 
-func part2(input NumPair) int {
+func (day) Part2(input NumPair, cont *fyne.Container) int {
 	var sum = 0
 	for _, x := range input.left {
 		var total = 0
@@ -70,7 +56,7 @@ func part2(input NumPair) int {
 	return sum
 }
 
-func Input(filename string) NumPair {
+func (day) Input(filename string) NumPair {
 	input := new(NumPair)
 	input.left = []int{}
 	input.right = []int{}

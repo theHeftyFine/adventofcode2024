@@ -11,6 +11,7 @@ import (
 	"github.com/theheftyfine/adventofcode2024/day1"
 	"github.com/theheftyfine/adventofcode2024/day10"
 	"github.com/theheftyfine/adventofcode2024/day11"
+	"github.com/theheftyfine/adventofcode2024/day12"
 	"github.com/theheftyfine/adventofcode2024/day2"
 	"github.com/theheftyfine/adventofcode2024/day3"
 	"github.com/theheftyfine/adventofcode2024/day4"
@@ -23,17 +24,18 @@ import (
 )
 
 var screens = []*fyne.Container{
-	day1.Widget("input/input1.txt"),
-	day2.Widget("input/input2.txt"),
-	day3.Widget("input/input3.txt"),
-	day4.Widget("input/input4.txt"),
-	day5.Widget("input/input5.txt"),
-	day6.Widget("input/input6.txt"),
-	day7.Widget("input/input7.txt"),
-	day8.Widget("input/input8.txt"),
-	day9.Widget("input/input9.txt"),
-	day10.Widget("input/input10.txt"),
-	day11.Widget("input/input11.txt"),
+	day1.Display("input/input1.txt"),
+	day2.Display("input/input2.txt"),
+	day3.Display("input/input3.txt"),
+	day4.Display("input/input4.txt"),
+	day5.Display("input/input5.txt"),
+	day6.Display("input/input6.txt"),
+	day7.Display("input/input7.txt"),
+	day8.Display("input/input8.txt"),
+	day9.Display("input/input9.txt"),
+	day10.Display("input/input10.txt"),
+	day11.Display("input/input11.txt"),
+	day12.Display("input/input12a.txt"),
 }
 
 func main() {
@@ -51,10 +53,17 @@ func main() {
 	}
 	rows := container.NewVBox(content)
 	w.SetContent(rows)
-	digit, err2 := strconv.Atoi("001")
-	if err2 != nil {
-		log.Fatal(err2)
-	}
-	fmt.Println(digit)
+
+	test := map[int]Test{}
+	test[1] = Test{3, "cheese", true}
+	fmt.Printf("%+v, %+v\n", test[0], test[1])
+
 	w.ShowAndRun()
+
+}
+
+type Test struct {
+	A   int
+	B   string
+	set bool
 }

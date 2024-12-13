@@ -1,14 +1,12 @@
 package day9
 
 import (
-	"fmt"
 	"image/color"
 	"log"
 	"math"
 	"os"
 	"slices"
 	"strconv"
-	"time"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
@@ -58,7 +56,7 @@ func (g *fragGridLayout) Layout(objects []fyne.CanvasObject, size fyne.Size) {
 		x2 := float32(cellWidth * float64(col+1))
 		y2 := float32(cellHeight * float64(row+1))
 
-		child.Move(fyne.NewPos(x1, y1))
+		child.Move(fyne.NewPos(y1, x1))
 		child.Resize(fyne.NewSize(x2-x1, y2-y1))
 		if (i+1)%g.Cols == 0 {
 			col++
@@ -95,23 +93,7 @@ var colors = []color.RGBA{
 
 var gray = color.RGBA{64, 64, 64, 64}
 
-func Day9(filename string) {
-	fmt.Println("Day 9:")
-
-	input := Input(filename)
-
-	start1 := time.Now()
-	result1 := part1(input)
-	elapsed1 := time.Since(start1)
-	fmt.Println("Part 1:", result1, "took:", elapsed1.Milliseconds(), "ms")
-
-	start2 := time.Now()
-	result2 := part2(input)
-	elapsed2 := time.Since(start2)
-	fmt.Println("Part 2:", result2, "took:", elapsed2.Milliseconds(), "ms")
-}
-
-func Widget(filename string) *fyne.Container {
+func Display(filename string) *fyne.Container {
 	resultLabel := widget.NewLabel("")
 	input := Input(filename)
 	button1 := widget.NewButton("Part 1", func() {
@@ -123,21 +105,48 @@ func Widget(filename string) *fyne.Container {
 	})
 
 	var cont *fyne.Container
+	gridContainer := container.NewCenter()
 
-	buttonGrid := widget.NewButton("Draw grid", func() {
-		gridContainer := container.NewCenter()
-
-		rects := createRectangles(input)
-		cols := int(math.Floor(math.Sqrt(float64(len(rects)))))
-		grid := container.New(&fragGridLayout{cols}, rects...)
-
-		gridContainer.Add(grid)
-		cont.Add(gridContainer)
+	button1draw := widget.NewButton("Simulate Part 1 ", func() {
+		rectGrid := displayGrid(input, gridContainer)
+		resultLabel.SetText("Result: " + strconv.Itoa(part1draw(input, rectGrid)))
 	})
 
-	buttonRow := container.NewHBox(button1, button2, buttonGrid)
-	cont = container.NewVBox(buttonRow, resultLabel)
+	buttonRow := container.NewHBox(button1, button2, button1draw)
+	cont = container.NewVBox(buttonRow, resultLabel, gridContainer)
 	return cont
+}
+
+func displayGrid(input []Block, cont *fyne.Container) *fyne.Container {
+	cont.RemoveAll()
+
+	rects := createRectangles(input)
+	cols := int(math.Floor(math.Sqrt(float64(len(rects)))))
+	grid := container.New(&fragGridLayout{cols}, rects...)
+
+	cont.Add(grid)
+	return grid
+}
+
+func updateGrid(cont *fyne.Container, pos int, blocks ...Block) {
+	if cont != nil {
+		rects := cont.Objects
+		index := pos
+		for _, block := range blocks {
+			clr := gray
+			if block.id >= 0 {
+				clr = colors[block.id%len(colors)]
+				for i := 0; i < block.size; i++ {
+					rect, ok := rects[index].(*canvas.Rectangle)
+					if ok && rect.FillColor != clr {
+						rect.FillColor = clr
+					}
+					index++
+				}
+			}
+		}
+		cont.Refresh()
+	}
 }
 
 func createRectangles(input []Block) []fyne.CanvasObject {
@@ -164,34 +173,7 @@ func part1(input []Block) int {
 	container := slices.Clone(input)
 
 	for !checkDefrag(container) {
-		var block Block
-		for i := len(container) - 1; i > 0; i-- {
-			block = container[i]
-			if block.id >= 0 {
-				head := container[:i]
-				tail := container[i+1:]
-				container = slices.Concat(head, tail)
-				break
-			}
-		}
-
-		for block.size > 0 {
-			for i, b := range container {
-				if b.id == -1 {
-					if b.size <= block.size {
-						block.size -= b.size
-						container[i].id = block.id
-					} else {
-						b.size -= block.size
-						newBlock := block
-						newSection := []Block{newBlock, b}
-						block.size = 0
-						container = slices.Concat(container[:i], newSection, container[i+1:])
-					}
-					break
-				}
-			}
-		}
+		container = moveBlocks(container, nil)
 	}
 
 	pos := 0
@@ -206,6 +188,64 @@ func part1(input []Block) int {
 	}
 
 	return out
+}
+
+func part1draw(input []Block, cont *fyne.Container) int {
+	out := 0
+	container := slices.Clone(input)
+
+	for !checkDefrag(container) {
+		container = moveBlocks(container, cont)
+	}
+
+	pos := 0
+
+	for _, block := range container {
+		for i := 0; i < block.size; i++ {
+			if block.id != -1 {
+				out += pos * block.id
+			}
+			pos++
+		}
+	}
+
+	return out
+}
+
+func moveBlocks(container []Block, cont *fyne.Container) []Block {
+	var block Block
+	for i := len(container) - 1; i > 0; i-- {
+		block = container[i]
+		if block.id >= 0 {
+			head := container[:i]
+			tail := container[i+1:]
+			container = slices.Concat(head, tail)
+			break
+		}
+	}
+
+	for block.size > 0 {
+		pos := 0
+		for i, b := range container {
+			if b.id == -1 {
+				if b.size <= block.size {
+					block.size -= b.size
+					container[i].id = block.id
+					updateGrid(cont, pos, container[i])
+				} else {
+					b.size -= block.size
+					newBlock := block
+					newSection := []Block{newBlock, b}
+					block.size = 0
+					container = slices.Concat(container[:i], newSection, container[i+1:])
+					updateGrid(cont, pos, newBlock, b)
+				}
+				break
+			}
+			pos += b.size
+		}
+	}
+	return container
 }
 
 func part2(input []Block) int {

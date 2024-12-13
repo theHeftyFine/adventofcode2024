@@ -2,42 +2,27 @@ package day6
 
 import (
 	"bufio"
-	"fmt"
 	"log"
 	"os"
-	"strconv"
 	"strings"
 
 	"fyne.io/fyne/v2"
-	"fyne.io/fyne/v2/container"
-	"fyne.io/fyne/v2/widget"
+	daydisplay "github.com/theheftyfine/adventofcode2024/display"
 )
 
 var dirs = [][]int{{-1, 0}, {0, 1}, {1, 0}, {0, -1}}
 
-func Day6(filename string) {
-	fmt.Println("Day 6")
-	input6 := Input(filename)
-	fmt.Println("Part 1:", part1(input6))
-	fmt.Println("Part 2:", part2(input6))
+type day struct{}
+
+var display = daydisplay.BasicDisplay[[]string]{
+	DayRunner: day{},
 }
 
-func Widget(filename string) *fyne.Container {
-	resultLabel := widget.NewLabel("")
-	input := Input(filename)
-	button1 := widget.NewButton("Part 1", func() {
-		resultLabel.SetText("Result: " + strconv.Itoa(part1(input)))
-	})
-
-	button2 := widget.NewButton("Part 2", func() {
-		resultLabel.SetText("Result: " + strconv.Itoa(part2(input)))
-	})
-
-	buttonRow := container.NewHBox(button1, button2)
-	return container.NewVBox(buttonRow, resultLabel)
+func Display(filename string) *fyne.Container {
+	return display.Widget(filename)
 }
 
-func part1(in []string) int {
+func (day) Part1(in []string, cont *fyne.Container) int {
 	input := copyInput(in)
 	dir := 0
 	y, x := findStart(input)
@@ -60,7 +45,7 @@ func part1(in []string) int {
 	return count
 }
 
-func part2(input []string) int {
+func (day) Part2(input []string, cont *fyne.Container) int {
 	count := 0
 	for i, l := range input {
 		for j := range l {
@@ -70,6 +55,22 @@ func part2(input []string) int {
 		}
 	}
 	return count
+}
+
+func (day) Input(filename string) []string {
+	out := []string{}
+	file, err := os.Open(filename)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	scanner := bufio.NewScanner(file)
+
+	for scanner.Scan() {
+		out = append(out, scanner.Text())
+	}
+
+	return out
 }
 
 func checkObstruction(in []string, ox int, oy int) bool {
@@ -105,22 +106,6 @@ func doLoop(x int, y int, dir int, input []string) (int, int, int) {
 		return x, y, dir
 	}
 	return xn, yn, dir
-}
-
-func Input(filename string) []string {
-	out := []string{}
-	file, err := os.Open(filename)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	scanner := bufio.NewScanner(file)
-
-	for scanner.Scan() {
-		out = append(out, scanner.Text())
-	}
-
-	return out
 }
 
 func copyInput(input []string) []string {

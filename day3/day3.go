@@ -1,7 +1,6 @@
 package day3
 
 import (
-	"fmt"
 	"log"
 	"os"
 	"regexp"
@@ -9,33 +8,20 @@ import (
 	"strings"
 
 	"fyne.io/fyne/v2"
-	"fyne.io/fyne/v2/container"
-	"fyne.io/fyne/v2/widget"
+	daydisplay "github.com/theheftyfine/adventofcode2024/display"
 )
 
-func Day3(filename string) {
-	fmt.Println("Day 3:")
-	input3 := Input(filename)
-	fmt.Println("when adding up all multiplication, as indicated by the method mul(x, y), the answer", part1(input3))
-	fmt.Println("However, when the method don't() stops processing, and the method do() starts it, the answer is", part2(input3))
+type day struct{}
+
+var display = daydisplay.BasicDisplay[string]{
+	DayRunner: day{},
 }
 
-func Widget(filename string) *fyne.Container {
-	resultLabel := widget.NewLabel("")
-	input := Input(filename)
-	button1 := widget.NewButton("Part 1", func() {
-		resultLabel.SetText("Result: " + strconv.Itoa(part1(input)))
-	})
-
-	button2 := widget.NewButton("Part 2", func() {
-		resultLabel.SetText("Result: " + strconv.Itoa(part2(input)))
-	})
-
-	buttonRow := container.NewHBox(button1, button2)
-	return container.NewVBox(buttonRow, resultLabel)
+func Display(filename string) *fyne.Container {
+	return display.Widget(filename)
 }
 
-func part1(input string) int {
+func (day) Part1(input string, cont *fyne.Container) int {
 	re := regexp.MustCompile(`mul\(\d{1,3},\d{1,3}\)`)
 	results := re.FindAllString(input, -1)
 
@@ -47,7 +33,7 @@ func part1(input string) int {
 	return sum
 }
 
-func part2(input string) int {
+func (day) Part2(input string, cont *fyne.Container) int {
 	mul := `mul\(\d{1,3},\d{1,3}\)`
 	do := `do\(\)`
 	dont := `don\'t\(\)`
@@ -95,7 +81,7 @@ func calcMul(mul string) int {
 	return product
 }
 
-func Input(filename string) string {
+func (day) Input(filename string) string {
 	file, err := os.ReadFile(filename)
 	if err != nil {
 		log.Fatal(err)

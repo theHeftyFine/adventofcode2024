@@ -7,12 +7,20 @@ import (
 	"strings"
 
 	"fyne.io/fyne/v2"
-	"fyne.io/fyne/v2/container"
-	"fyne.io/fyne/v2/widget"
-	"golang.design/x/clipboard"
+	daydisplay "github.com/theheftyfine/adventofcode2024/display"
 )
 
-func Input(filename string) []int {
+type day struct{}
+
+var display = daydisplay.BasicDisplay[[]int]{
+	DayRunner: day{},
+}
+
+func Display(filename string) *fyne.Container {
+	return display.Widget(filename)
+}
+
+func (day) Input(filename string) []int {
 	out := []int{}
 	file, err := os.ReadFile(filename)
 	if err != nil {
@@ -31,32 +39,12 @@ func Input(filename string) []int {
 	return out
 }
 
-func Widget(filename string) *fyne.Container {
-	resultLabel := widget.NewLabel("Result:")
-	resultValue := widget.NewLabel("")
-	copyButton := widget.NewButton("copy", func() {
-		clipboard.Write(clipboard.FmtText, []byte(resultValue.Text))
-	})
-	resultBar := container.NewHBox(resultLabel, resultValue)
-	var cont *fyne.Container
-	input := Input(filename)
-	button1 := widget.NewButton("Part 1", func() {
-		resultValue.SetText(strconv.Itoa(part(input, 25)))
-		if !exists(copyButton, resultBar.Objects) {
-			resultBar.Add(copyButton)
-		}
-	})
+func (day) Part1(input []int, cont *fyne.Container) int {
+	return part(input, 25)
+}
 
-	button2 := widget.NewButton("Part 2", func() {
-		resultValue.SetText(strconv.Itoa(part(input, 75)))
-		if !exists(copyButton, resultBar.Objects) {
-			resultBar.Add(copyButton)
-		}
-	})
-
-	buttonRow := container.NewHBox(button1, button2)
-	cont = container.NewVBox(buttonRow, resultBar)
-	return cont
+func (day) Part2(input []int, cont *fyne.Container) int {
+	return part(input, 25)
 }
 
 func part(input []int, times int) int {

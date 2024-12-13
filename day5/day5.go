@@ -2,7 +2,6 @@ package day5
 
 import (
 	"bufio"
-	"fmt"
 	"log"
 	"os"
 	"slices"
@@ -10,33 +9,25 @@ import (
 	"strings"
 
 	"fyne.io/fyne/v2"
-	"fyne.io/fyne/v2/container"
-	"fyne.io/fyne/v2/widget"
+	daydisplay "github.com/theheftyfine/adventofcode2024/display"
 )
 
-func Day5(filename string) {
-	fmt.Println("Day 5")
-	rules5, updates5 := Input(filename)
-	fmt.Println("part 1:", part1(rules5, updates5))
-	fmt.Println("Part 2:", part2(rules5, updates5))
+type input struct {
+	rules   map[int][]int
+	updates [][]int
 }
 
-func Widget(filename string) *fyne.Container {
-	resultLabel := widget.NewLabel("")
-	rules, updates := Input(filename)
-	button1 := widget.NewButton("Part 1", func() {
-		resultLabel.SetText("Result: " + strconv.Itoa(part1(rules, updates)))
-	})
+type day struct{}
 
-	button2 := widget.NewButton("Part 2", func() {
-		resultLabel.SetText("Result: " + strconv.Itoa(part2(rules, updates)))
-	})
-
-	buttonRow := container.NewHBox(button1, button2)
-	return container.NewVBox(buttonRow, resultLabel)
+var display = daydisplay.BasicDisplay[input]{
+	DayRunner: day{},
 }
 
-func Input(filename string) (map[int][]int, [][]int) {
+func Display(filename string) *fyne.Container {
+	return display.Widget(filename)
+}
+
+func (day) Input(filename string) input {
 	var ruleMap = make(map[int][]int)
 	var updates = [][]int{}
 
@@ -70,25 +61,25 @@ func Input(filename string) (map[int][]int, [][]int) {
 		}
 	}
 
-	return ruleMap, updates
+	return input{ruleMap, updates}
 
 }
 
-func part1(rules map[int][]int, updates [][]int) int {
+func (day) Part1(update input, cont *fyne.Container) int {
 	var sum = 0
-	for _, row := range updates {
-		if checkRow(row, rules) {
+	for _, row := range update.updates {
+		if checkRow(row, update.rules) {
 			sum += getMid(row)
 		}
 	}
 	return sum
 }
 
-func part2(rules map[int][]int, updates [][]int) int {
+func (day) Part2(update input, cont *fyne.Container) int {
 	var sum = 0
-	for _, row := range updates {
-		if !checkRow(row, rules) {
-			sum += getMid(rearrange(row, rules))
+	for _, row := range update.updates {
+		if !checkRow(row, update.rules) {
+			sum += getMid(rearrange(row, update.rules))
 		}
 	}
 	return sum

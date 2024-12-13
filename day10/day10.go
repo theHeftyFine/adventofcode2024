@@ -35,7 +35,7 @@ func Day10(filename string) {
 	fmt.Println("Part 2:", part2)
 }
 
-func Widget(filename string) *fyne.Container {
+func Display(filename string) *fyne.Container {
 	resultLabel := widget.NewLabel("")
 	input := Input(filename)
 
@@ -74,8 +74,6 @@ func simulateRoute(rects []*canvas.Rectangle, route []Node, input [][]int) {
 		if r.h == 9 {
 			h.G = 255
 		}
-		rect := canvas.NewRectangle(h)
-		rect.SetMinSize(fyne.NewSize(10, 10))
 
 		index := (r.y * (len(input))) + r.x
 		rects[index].FillColor = h
