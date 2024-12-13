@@ -2,34 +2,42 @@ package day8
 
 import (
 	"bufio"
+	"github.com/theheftyfine/adventofcode2024/model"
 	"log"
 	"os"
 	"slices"
 	"strings"
-
-	"fyne.io/fyne/v2"
-	daydisplay "github.com/theheftyfine/adventofcode2024/display"
 )
 
-type day struct{}
-
-var display = daydisplay.BasicDisplay[[]string]{
-	DayRunner: day{},
+type day struct {
+	input []string
 }
 
-func Display(filename string) *fyne.Container {
-	return display.Widget(filename)
+func (d day) part1() int {
+	return part1(d.input)
 }
 
-func (day) Part1(input []string, cont *fyne.Container) int {
+func (d day) part2() int {
+	return part2(d.input)
+}
+
+func (d day) Parts() []func() int {
+	return []func() int{d.part1, d.part2}
+}
+
+func NewDay(filename string) model.DayRunner {
+	return day{input: input(filename)}
+}
+
+func part1(input []string) int {
 	return calcNodes(input, drawPart1)
 }
 
-func (day) Part2(input []string, cont *fyne.Container) int {
+func part2(input []string) int {
 	return calcNodes(input, drawPart2)
 }
 
-func (day) Input(filename string) []string {
+func input(filename string) []string {
 	out := []string{}
 
 	file, err := os.Open(filename)

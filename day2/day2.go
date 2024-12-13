@@ -2,27 +2,35 @@ package day2
 
 import (
 	"bufio"
+	"github.com/theheftyfine/adventofcode2024/model"
 	"log"
 	"os"
 	"regexp"
 	"slices"
 	"strconv"
-
-	"fyne.io/fyne/v2"
-	daydisplay "github.com/theheftyfine/adventofcode2024/display"
 )
 
-type day struct{}
-
-var display = daydisplay.BasicDisplay[[][]int]{
-	DayRunner: day{},
+type day struct {
+	input [][]int
 }
 
-func Display(filename string) *fyne.Container {
-	return display.Widget(filename)
+func (d day) part1() int {
+	return part1(d.input)
 }
 
-func (day) Part1(input [][]int, cont *fyne.Container) int {
+func (d day) part2() int {
+	return part2(d.input)
+}
+
+func (d day) Parts() []func() int {
+	return []func() int{d.part1, d.part2}
+}
+
+func NewDay(filename string) model.DayRunner {
+	return day{input: input(filename)}
+}
+
+func part1(input [][]int) int {
 	var safe = 0
 
 	for _, row := range input {
@@ -34,7 +42,7 @@ func (day) Part1(input [][]int, cont *fyne.Container) int {
 	return safe
 }
 
-func (day) Part2(input [][]int, cont *fyne.Container) int {
+func part2(input [][]int) int {
 	var safe = 0
 
 	for _, row := range input {
@@ -93,7 +101,7 @@ func splitLevels(levels []int) [][]int {
 	return out
 }
 
-func (day) Input(filename string) [][]int {
+func input(filename string) [][]int {
 	input := [][]int{}
 
 	file, err := os.Open(filename)

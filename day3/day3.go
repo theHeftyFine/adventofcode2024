@@ -1,27 +1,35 @@
 package day3
 
 import (
+	"github.com/theheftyfine/adventofcode2024/model"
 	"log"
 	"os"
 	"regexp"
 	"strconv"
 	"strings"
-
-	"fyne.io/fyne/v2"
-	daydisplay "github.com/theheftyfine/adventofcode2024/display"
 )
 
-type day struct{}
-
-var display = daydisplay.BasicDisplay[string]{
-	DayRunner: day{},
+type day struct {
+	input string
 }
 
-func Display(filename string) *fyne.Container {
-	return display.Widget(filename)
+func (d day) part1() int {
+	return part1(d.input)
 }
 
-func (day) Part1(input string, cont *fyne.Container) int {
+func (d day) part2() int {
+	return part2(d.input)
+}
+
+func (d day) Parts() []func() int {
+	return []func() int{d.part1, d.part2}
+}
+
+func NewDay(filename string) model.DayRunner {
+	return day{input: input(filename)}
+}
+
+func part1(input string) int {
 	re := regexp.MustCompile(`mul\(\d{1,3},\d{1,3}\)`)
 	results := re.FindAllString(input, -1)
 
@@ -33,7 +41,7 @@ func (day) Part1(input string, cont *fyne.Container) int {
 	return sum
 }
 
-func (day) Part2(input string, cont *fyne.Container) int {
+func part2(input string) int {
 	mul := `mul\(\d{1,3},\d{1,3}\)`
 	do := `do\(\)`
 	dont := `don\'t\(\)`
@@ -81,7 +89,7 @@ func calcMul(mul string) int {
 	return product
 }
 
-func (day) Input(filename string) string {
+func input(filename string) string {
 	file, err := os.ReadFile(filename)
 	if err != nil {
 		log.Fatal(err)

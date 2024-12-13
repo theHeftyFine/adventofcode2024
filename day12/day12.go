@@ -3,67 +3,44 @@ package day12
 import (
 	"bufio"
 	"fmt"
-	"image/color"
 	"log"
-	"math/rand/v2"
 	"os"
 
-	"fyne.io/fyne/v2"
-	daydisplay "github.com/theheftyfine/adventofcode2024/display"
 	"github.com/theheftyfine/adventofcode2024/model"
 )
 
 type tile = model.Tile
 
-type Field struct {
+type field struct {
 	tiles map[coord]tile
 	crop  rune
 }
 
 type coord = model.Coord
 
-// func (c coord) Add(b coord) coord {
-// 	return coord{c.y + b.y, c.x + b.x}
-// }
-
-// func (c coord) Flatten(maxH int) int {
-// 	return (c.y * maxH) + c.x
-// }
-
-// func (c coord) Includes(coords []coord) bool {
-// 	for _, co := range coords {
-// 		if c == co {
-// 			return true
-// 		}
-// 	}
-// 	return false
-// }
-
-// func (c coord) Turn() coord {
-// 	return coord{y: c.x, x: c.y}
-// }
-
-// func (c coord) Negate() coord {
-// 	return coord{y: c.y * -1, x: c.x * -1}
-// }
-
-// func (c coord) Border(dir coord, fields map[coord]tile) bool {
-// 	return fields[c.Add(dir)].set
-// }
-
 var dirs = []coord{{1, 0}, {-1, 0}, {0, 1}, {0, -1}}
 
-type day struct{}
-
-var display = daydisplay.BasicDisplay[[][]tile]{
-	DayRunner: day{},
+type day struct {
+	input [][]tile
 }
 
-func Display(filename string) *fyne.Container {
-	return display.Widget(filename)
+func (d day) part1() int {
+	return part1(d.input)
 }
 
-func (day) Input(filename string) [][]tile {
+func (d day) part2() int {
+	return part2(d.input)
+}
+
+func (d day) Parts() []func() int {
+	return []func() int{d.part1, d.part2}
+}
+
+func NewDay(filename string) model.DayRunner {
+	return day{input: input(filename)}
+}
+
+func input(filename string) [][]tile {
 	out := [][]tile{}
 	file, err := os.Open(filename)
 	if err != nil {
@@ -84,39 +61,26 @@ func (day) Input(filename string) [][]tile {
 	return out
 }
 
-func (day) Part1(input [][]tile, cont *fyne.Container) int {
-	return calc(input, cont, calcPerimiter)
+func part1(input [][]tile) int {
+	return calc(input, calcPerimiter)
 }
 
-func (day) Part2(input [][]tile, cont *fyne.Container) int {
-	return calc(input, cont, calcPerimiter2)
+func part2(input [][]tile) int {
+	return calc(input, calcPerimiter2)
 }
 
-func calc(input [][]tile, cont *fyne.Container, f func(field map[coord]tile) (int, []coord)) int {
+func calc(input [][]tile, f func(field map[coord]tile) (int, []coord)) int {
 	out := 0
 	covered := []tile{}
-	fields := []Field{}
-
-	// plots := []fyne.CanvasObject{}
-
-	// cont.RemoveAll()
-
-	// for _, row := range input {
-	// 	for i := 0; i < len(row); i++ {
-	// 		plots = append(plots, canvas.NewText(".", color.White))
-	// 	}
-	// }
-
-	// grid := container.NewGridWithColumns(len(input), plots...)
-	// cont.Add(grid)
+	fields := []field{}
 
 	for _, row := range input {
 		for _, t := range row {
 			if includes(t, covered) {
 				continue
 			}
-			field := map[coord]tile{} //[]tile{tile}
-			field[t.Loc] = t
+			f := map[coord]tile{} //[]tile{tile}
+			f[t.Loc] = t
 			perimiter := []tile{t}
 			crop := t.Crop
 
@@ -127,9 +91,9 @@ func calc(input [][]tile, cont *fyne.Container, f func(field map[coord]tile) (in
 						nPos := dir.Add(ti.Loc)
 						if inBound(nPos, input) {
 							ntile := input[nPos.Y][nPos.X]
-							if ntile.Crop == crop && !includesMap(ntile, field) {
+							if ntile.Crop == crop && !includesMap(ntile, f) {
 								nPerimiter = append(nPerimiter, ntile)
-								field[ntile.Loc] = ntile
+								f[ntile.Loc] = ntile
 								covered = append(covered, ntile)
 							}
 						}
@@ -137,7 +101,7 @@ func calc(input [][]tile, cont *fyne.Container, f func(field map[coord]tile) (in
 				}
 				perimiter = nPerimiter
 			}
-			fields = append(fields, Field{field, crop})
+			fields = append(fields, field{f, crop})
 		}
 	}
 
@@ -232,33 +196,4 @@ func includesMap(tile tile, tiles map[coord]tile) bool {
 
 func inBound(t coord, input [][]tile) bool {
 	return t.Y >= 0 && t.Y < len(input) && t.X >= 0 && t.X < len(input[0])
-}
-
-// func findField(y int, x int, tiles []tile) bool {
-// 	for _, tile := range tiles {
-// 		if y == tile.y && x == tile.x {
-// 			return true
-// 		}
-// 	}
-// 	return false
-// }
-
-func randomColor() color.Color {
-	r := uint8(rand.Float32() * 255)
-	g := uint8(rand.Float32() * 255)
-	b := uint8(rand.Float32() * 255)
-	return color.RGBA{r, g, b, 255}
-}
-
-func getNeighbors(field map[coord]tile, c coord, dir coord) []tile {
-	n1 := field[c.Add(dir.Turn())]
-	n2 := field[c.Add(dir.Turn().Negate())]
-	neighbours := []tile{}
-	if n1.Set {
-		neighbours = append(neighbours, n1)
-	}
-	if n2.Set {
-		neighbours = append(neighbours, n2)
-	}
-	return neighbours
 }

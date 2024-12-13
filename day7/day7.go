@@ -2,13 +2,11 @@ package day7
 
 import (
 	"bufio"
+	"github.com/theheftyfine/adventofcode2024/model"
 	"log"
 	"os"
 	"strconv"
 	"strings"
-
-	"fyne.io/fyne/v2"
-	daydisplay "github.com/theheftyfine/adventofcode2024/display"
 )
 
 type Test struct {
@@ -19,25 +17,35 @@ type Test struct {
 var ops1 = []func(int, int) int{sum, product}
 var ops2 = []func(int, int) int{sum, product, concat}
 
-type day struct{}
-
-var display = daydisplay.BasicDisplay[[]Test]{
-	DayRunner: day{},
+type day struct {
+	input []Test
 }
 
-func Display(filename string) *fyne.Container {
-	return display.Widget(filename)
+func (d day) part1() int {
+	return part1(d.input)
 }
 
-func (day) Part1(input []Test, cont *fyne.Container) int {
+func (d day) part2() int {
+	return part2(d.input)
+}
+
+func (d day) Parts() []func() int {
+	return []func() int{d.part1, d.part2}
+}
+
+func NewDay(filename string) model.DayRunner {
+	return day{input: input(filename)}
+}
+
+func part1(input []Test) int {
 	return part(input, ops1)
 }
 
-func (day) Part2(input []Test, cont *fyne.Container) int {
+func part2(input []Test) int {
 	return part(input, ops2)
 }
 
-func (day) Input(filename string) []Test {
+func input(filename string) []Test {
 	out := []Test{}
 	file, err := os.Open(filename)
 	if err != nil {

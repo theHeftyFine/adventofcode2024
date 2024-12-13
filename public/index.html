@@ -1,0 +1,67 @@
+<html>
+<head>
+  <script src="https://unpkg.com/htmx.org@2.0.3"></script>
+  <title>Advent of Code 2024</title>
+  <style>
+    .htmx-indicator{
+      display:none;
+      width: 15px;
+      height: 15px;
+    }
+    .htmx-request .htmx-indicator{
+      display:inline;
+    }
+    .htmx-request.htmx-indicator{
+      display:inline;
+    }
+
+    .container {
+      width: 100%;
+      margin: 0 auto;
+      padding-left: 10vw;
+    }
+
+    .side-bar {
+      float: left;
+      width: 10vw;
+      background-color: grey;
+      margin-left:-10vw;
+    }
+
+    .side-bar span {
+      color: white;
+      font-weight: bolder;
+    }
+
+    .side-button:hover {
+      background-color: lightgray;
+      transition: background-color ease-in .3s;
+    }
+
+    .side-button {
+      display: flex;
+      justify-content: center;
+      cursor: pointer;
+      padding: 15px 10px;
+      background-color: gray;
+    }
+
+    .content {
+      padding: 10px 20px
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+  <div class="side-bar" hx-get="/sidebar" hx-trigger="load" hx-swap="outerHTML"></div>
+  <div class="content">
+    <h1>Advent of Code 2024</h1>
+    <div id="days">
+    </div>
+  </div>
+</div>
+
+
+</div>
+</body>
+</html>

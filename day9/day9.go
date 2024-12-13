@@ -1,17 +1,13 @@
 package day9
 
 import (
-	"image/color"
+	"github.com/theheftyfine/adventofcode2024/model"
 	"log"
-	"math"
 	"os"
 	"slices"
 	"strconv"
 
 	"fyne.io/fyne/v2"
-	"fyne.io/fyne/v2/canvas"
-	"fyne.io/fyne/v2/container"
-	"fyne.io/fyne/v2/widget"
 )
 
 type Block struct {
@@ -19,153 +15,24 @@ type Block struct {
 	id   int
 }
 
-type fragGridLayout struct {
-	Cols int
+type day struct {
+	input []Block
 }
 
-func (g *fragGridLayout) countRows(objects []fyne.CanvasObject) int {
-	if g.Cols < 1 {
-		g.Cols = 1
-	}
-	count := 0
-	for _, child := range objects {
-		if child.Visible() {
-			count++
-		}
-	}
-
-	return int(math.Ceil(float64(count) / float64(g.Cols)))
+func (d day) part1() int {
+	return part1(d.input)
 }
 
-func (g *fragGridLayout) Layout(objects []fyne.CanvasObject, size fyne.Size) {
-	rows := g.countRows(objects)
-	cols := g.Cols
-
-	cellWidth := float64(size.Width) / float64(rows)
-	cellHeight := float64(size.Height) / float64(cols)
-
-	row, col := 0, 0
-	i := 0
-	for _, child := range objects {
-		if !child.Visible() {
-			continue
-		}
-
-		x1 := float32(cellWidth * float64(col))
-		y1 := float32(cellHeight * float64(row))
-		x2 := float32(cellWidth * float64(col+1))
-		y2 := float32(cellHeight * float64(row+1))
-
-		child.Move(fyne.NewPos(y1, x1))
-		child.Resize(fyne.NewSize(x2-x1, y2-y1))
-		if (i+1)%g.Cols == 0 {
-			col++
-			row = 0
-		} else {
-			row++
-		}
-		i++
-	}
+func (d day) part2() int {
+	return part2(d.input)
 }
 
-func (g *fragGridLayout) MinSize(objects []fyne.CanvasObject) fyne.Size {
-	rows := g.countRows(objects)
-	minSize := fyne.NewSize(0, 0)
-	for _, child := range objects {
-		if !child.Visible() {
-			continue
-		}
-		minSize = minSize.Max(child.MinSize())
-	}
-
-	return fyne.NewSize(minSize.Width*float32(rows), minSize.Height*float32(g.Cols))
+func (d day) Parts() []func() int {
+	return []func() int{d.part1, d.part2}
 }
 
-var colors = []color.RGBA{
-	{238, 130, 238, 255}, //violet
-	{75, 0, 130, 255},    //indigo
-	{0, 0, 255, 255},     //blue
-	{0, 128, 0, 255},     //green
-	{255, 255, 0, 255},   //yellow
-	{255, 165, 130, 255}, //orange
-	{255, 0, 0, 255},     //red
-}
-
-var gray = color.RGBA{64, 64, 64, 64}
-
-func Display(filename string) *fyne.Container {
-	resultLabel := widget.NewLabel("")
-	input := Input(filename)
-	button1 := widget.NewButton("Part 1", func() {
-		resultLabel.SetText("Result: " + strconv.Itoa(part1(input)))
-	})
-
-	button2 := widget.NewButton("Part 2", func() {
-		resultLabel.SetText("Result: " + strconv.Itoa(part2(input)))
-	})
-
-	var cont *fyne.Container
-	gridContainer := container.NewCenter()
-
-	button1draw := widget.NewButton("Simulate Part 1 ", func() {
-		rectGrid := displayGrid(input, gridContainer)
-		resultLabel.SetText("Result: " + strconv.Itoa(part1draw(input, rectGrid)))
-	})
-
-	buttonRow := container.NewHBox(button1, button2, button1draw)
-	cont = container.NewVBox(buttonRow, resultLabel, gridContainer)
-	return cont
-}
-
-func displayGrid(input []Block, cont *fyne.Container) *fyne.Container {
-	cont.RemoveAll()
-
-	rects := createRectangles(input)
-	cols := int(math.Floor(math.Sqrt(float64(len(rects)))))
-	grid := container.New(&fragGridLayout{cols}, rects...)
-
-	cont.Add(grid)
-	return grid
-}
-
-func updateGrid(cont *fyne.Container, pos int, blocks ...Block) {
-	if cont != nil {
-		rects := cont.Objects
-		index := pos
-		for _, block := range blocks {
-			clr := gray
-			if block.id >= 0 {
-				clr = colors[block.id%len(colors)]
-				for i := 0; i < block.size; i++ {
-					rect, ok := rects[index].(*canvas.Rectangle)
-					if ok && rect.FillColor != clr {
-						rect.FillColor = clr
-					}
-					index++
-				}
-			}
-		}
-		cont.Refresh()
-	}
-}
-
-func createRectangles(input []Block) []fyne.CanvasObject {
-	rects := []fyne.CanvasObject{}
-
-	for _, block := range input {
-		cl := gray
-		if block.id == 0 {
-			cl = colors[0]
-		} else if block.id > 0 {
-			cl = colors[block.id%len(colors)]
-		}
-		for i := 0; i < block.size; i++ {
-			rect := canvas.NewRectangle(cl)
-			rect.SetMinSize(fyne.NewSize(2, 2))
-			rects = append(rects, rect)
-		}
-	}
-	return rects
+func NewDay(filename string) model.DayRunner {
+	return day{input: input(filename)}
 }
 
 func part1(input []Block) int {
@@ -174,28 +41,6 @@ func part1(input []Block) int {
 
 	for !checkDefrag(container) {
 		container = moveBlocks(container, nil)
-	}
-
-	pos := 0
-
-	for _, block := range container {
-		for i := 0; i < block.size; i++ {
-			if block.id != -1 {
-				out += pos * block.id
-			}
-			pos++
-		}
-	}
-
-	return out
-}
-
-func part1draw(input []Block, cont *fyne.Container) int {
-	out := 0
-	container := slices.Clone(input)
-
-	for !checkDefrag(container) {
-		container = moveBlocks(container, cont)
 	}
 
 	pos := 0
@@ -231,14 +76,12 @@ func moveBlocks(container []Block, cont *fyne.Container) []Block {
 				if b.size <= block.size {
 					block.size -= b.size
 					container[i].id = block.id
-					updateGrid(cont, pos, container[i])
 				} else {
 					b.size -= block.size
 					newBlock := block
 					newSection := []Block{newBlock, b}
 					block.size = 0
 					container = slices.Concat(container[:i], newSection, container[i+1:])
-					updateGrid(cont, pos, newBlock, b)
 				}
 				break
 			}
@@ -295,7 +138,7 @@ func moveBlock(input []Block) ([]Block, bool) {
 	return input, false
 }
 
-func Input(filename string) []Block {
+func input(filename string) []Block {
 	out := []Block{}
 	content, err := os.ReadFile(filename)
 	if err != nil {

@@ -1,0 +1,12 @@
+<div class="side-bar"
+     id="side-bar">
+  {{- range $i := .}}
+    <div class="side-button"
+         hx-get="/day/{{$i}}"
+         hx-trigger="click"
+         hx-target="#days"
+         hx-swap="innerHTML">
+      <span>DAY {{$i}}</span>
+    </div>
+  {{- end}}
+</div>

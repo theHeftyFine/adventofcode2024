@@ -1,0 +1,23 @@
+{{- range $i := . }}
+  <div>
+    Day {{$i}}
+  </div>
+  <div>
+    <button hx-get="/day/{{$i}}/1"
+            hx-target="#result-{{$i}}"
+            hx-swap="outerHTML"
+            hx-indicator="#result-indicator-{{$i}}">
+      Part 1
+    </button>
+    <button hx-get="/day/{{$i}}/2"
+            hx-target="#result-{{$i}}"
+            hx-swap="outerHTML"
+            hx-indicator="#result-indicator-{{$i}}">
+      Part 2
+    </button>
+  </div>
+  <div id="day-{{$i}}-result">
+    <span id="result-{{$i}}"></span>
+    <img id="result-indicator-{{$i}}" alt="I <3 you" class="htmx-indicator" src="/assets/loader.gif"/>
+  </div>
+{{- end}}

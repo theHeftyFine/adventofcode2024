@@ -1,26 +1,35 @@
 package day11
 
 import (
+	"fyne.io/fyne/v2"
+	"github.com/theheftyfine/adventofcode2024/model"
 	"log"
 	"os"
 	"strconv"
 	"strings"
-
-	"fyne.io/fyne/v2"
-	daydisplay "github.com/theheftyfine/adventofcode2024/display"
 )
 
-type day struct{}
-
-var display = daydisplay.BasicDisplay[[]int]{
-	DayRunner: day{},
+type day struct {
+	input []int
 }
 
-func Display(filename string) *fyne.Container {
-	return display.Widget(filename)
+func (d day) part1() int {
+	return part1(d.input)
 }
 
-func (day) Input(filename string) []int {
+func (d day) part2() int {
+	return part2(d.input)
+}
+
+func (d day) Parts() []func() int {
+	return []func() int{d.part1, d.part2}
+}
+
+func NewDay(filename string) model.DayRunner {
+	return day{input: input(filename)}
+}
+
+func input(filename string) []int {
 	out := []int{}
 	file, err := os.ReadFile(filename)
 	if err != nil {
@@ -39,11 +48,11 @@ func (day) Input(filename string) []int {
 	return out
 }
 
-func (day) Part1(input []int, cont *fyne.Container) int {
+func part1(input []int) int {
 	return part(input, 25)
 }
 
-func (day) Part2(input []int, cont *fyne.Container) int {
+func part2(input []int) int {
 	return part(input, 25)
 }
 

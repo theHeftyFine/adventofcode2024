@@ -2,19 +2,11 @@ package day10
 
 import (
 	"bufio"
-	"fmt"
-	"image/color"
+	"github.com/theheftyfine/adventofcode2024/model"
 	"log"
 	"os"
 	"slices"
 	"strconv"
-	"time"
-
-	"fyne.io/fyne/v2"
-	"fyne.io/fyne/v2/canvas"
-	"fyne.io/fyne/v2/container"
-	"fyne.io/fyne/v2/layout"
-	"fyne.io/fyne/v2/widget"
 )
 
 type Node struct {
@@ -27,97 +19,24 @@ type Node struct {
 
 var dirs = [][]int{{1, 0}, {-1, 0}, {0, 1}, {0, -1}}
 
-func Day10(filename string) {
-	fmt.Println("Day 10")
-	input := Input(filename)
-	part1, part2, _ := part(input)
-	fmt.Println("Part 1:", part1)
-	fmt.Println("Part 2:", part2)
+type day struct {
+	input [][]int
 }
 
-func Display(filename string) *fyne.Container {
-	resultLabel := widget.NewLabel("")
-	input := Input(filename)
-
-	button1 := widget.NewButton("Part 1", func() {
-		resultLabel.SetText("Result: " + strconv.Itoa(part1(input)))
-	})
-
-	button2 := widget.NewButton("Part 2", func() {
-		resultLabel.SetText("Result: " + strconv.Itoa(part2(input)))
-	})
-
-	mapContainer := container.NewCenter()
-
-	buttonDraw := widget.NewButton("Draw map", func() {
-		_, _, routes := part(input)
-		rects := drawRectangles(input)
-		mapContainer.Add(fillWithRects(rects, len(input)))
-		for _, route := range routes {
-			go func() {
-				simulateRoute(rects, route, input)
-			}()
-		}
-	})
-
-	buttonRow := container.NewHBox(button1, button2, buttonDraw)
-
-	rows := container.NewVBox(buttonRow, resultLabel, mapContainer)
-	return rows
+func (d day) part1() int {
+	return part1(d.input)
 }
 
-func simulateRoute(rects []*canvas.Rectangle, route []Node, input [][]int) {
-	resetRectangles(rects, input)
-	for _, r := range route {
-		col := uint8((255/10)*r.h + 1)
-		h := color.RGBA{col, 0, 0, 255}
-		if r.h == 9 {
-			h.G = 255
-		}
-
-		index := (r.y * (len(input))) + r.x
-		rects[index].FillColor = h
-		rects[index].Refresh()
-		time.Sleep(50 * time.Millisecond)
-	}
-
+func (d day) part2() int {
+	return part2(d.input)
 }
 
-func fillWithRects(rects []*canvas.Rectangle, cols int) *fyne.Container {
-	grid := container.New(layout.NewGridLayout(cols))
-	for _, rect := range rects {
-		grid.Add(rect)
-	}
-	return grid
+func (d day) Parts() []func() int {
+	return []func() int{d.part1, d.part2}
 }
 
-func resetRectangles(rects []*canvas.Rectangle, input [][]int) {
-	for j, row := range input {
-		for i, cell := range row {
-			index := (j * (len(input))) + i
-			col := uint8((256 / 10) * (cell + 1))
-			h := color.RGBA{0, col, 0, 255}
-			if rects[index].FillColor != h {
-				rects[index].FillColor = h
-				rects[index].Refresh()
-			}
-		}
-	}
-}
-
-func drawRectangles(input [][]int) []*canvas.Rectangle {
-	rects := []*canvas.Rectangle{}
-
-	for _, row := range input {
-		for _, cell := range row {
-			col := uint8((256 / 10) * (cell + 1))
-			h := color.RGBA{0, col, 0, 255}
-			rect := canvas.NewRectangle(h)
-			rect.SetMinSize(fyne.NewSize(10, 10))
-			rects = append(rects, rect)
-		}
-	}
-	return rects
+func NewDay(filename string) model.DayRunner {
+	return day{input: input(filename)}
 }
 
 func part1(input [][]int) int {
@@ -241,7 +160,7 @@ func traceMap(head Node, input [][]int) (Node, [][]rune, []Node) {
 	return *root, mp, routes
 }
 
-func Input(filename string) [][]int {
+func input(filename string) [][]int {
 	out := [][]int{}
 	file, err := os.Open(filename)
 	if err != nil {

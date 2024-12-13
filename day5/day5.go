@@ -2,32 +2,40 @@ package day5
 
 import (
 	"bufio"
+	"github.com/theheftyfine/adventofcode2024/model"
 	"log"
 	"os"
 	"slices"
 	"strconv"
 	"strings"
-
-	"fyne.io/fyne/v2"
-	daydisplay "github.com/theheftyfine/adventofcode2024/display"
 )
 
-type input struct {
+type in struct {
 	rules   map[int][]int
 	updates [][]int
 }
 
-type day struct{}
-
-var display = daydisplay.BasicDisplay[input]{
-	DayRunner: day{},
+type day struct {
+	input in
 }
 
-func Display(filename string) *fyne.Container {
-	return display.Widget(filename)
+func (d day) part1() int {
+	return part1(d.input)
 }
 
-func (day) Input(filename string) input {
+func (d day) part2() int {
+	return part2(d.input)
+}
+
+func (d day) Parts() []func() int {
+	return []func() int{d.part1, d.part2}
+}
+
+func NewDay(filename string) model.DayRunner {
+	return day{input: input(filename)}
+}
+
+func input(filename string) in {
 	var ruleMap = make(map[int][]int)
 	var updates = [][]int{}
 
@@ -61,11 +69,11 @@ func (day) Input(filename string) input {
 		}
 	}
 
-	return input{ruleMap, updates}
+	return in{ruleMap, updates}
 
 }
 
-func (day) Part1(update input, cont *fyne.Container) int {
+func part1(update in) int {
 	var sum = 0
 	for _, row := range update.updates {
 		if checkRow(row, update.rules) {
@@ -75,7 +83,7 @@ func (day) Part1(update input, cont *fyne.Container) int {
 	return sum
 }
 
-func (day) Part2(update input, cont *fyne.Container) int {
+func part2(update in) int {
 	var sum = 0
 	for _, row := range update.updates {
 		if !checkRow(row, update.rules) {

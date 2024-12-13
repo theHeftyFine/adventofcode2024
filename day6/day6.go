@@ -2,27 +2,35 @@ package day6
 
 import (
 	"bufio"
+	"github.com/theheftyfine/adventofcode2024/model"
 	"log"
 	"os"
 	"strings"
-
-	"fyne.io/fyne/v2"
-	daydisplay "github.com/theheftyfine/adventofcode2024/display"
 )
 
 var dirs = [][]int{{-1, 0}, {0, 1}, {1, 0}, {0, -1}}
 
-type day struct{}
-
-var display = daydisplay.BasicDisplay[[]string]{
-	DayRunner: day{},
+type day struct {
+	input []string
 }
 
-func Display(filename string) *fyne.Container {
-	return display.Widget(filename)
+func (d day) part1() int {
+	return part1(d.input)
 }
 
-func (day) Part1(in []string, cont *fyne.Container) int {
+func (d day) part2() int {
+	return part2(d.input)
+}
+
+func (d day) Parts() []func() int {
+	return []func() int{d.part1, d.part2}
+}
+
+func NewDay(filename string) model.DayRunner {
+	return day{input: input(filename)}
+}
+
+func part1(in []string) int {
 	input := copyInput(in)
 	dir := 0
 	y, x := findStart(input)
@@ -45,7 +53,7 @@ func (day) Part1(in []string, cont *fyne.Container) int {
 	return count
 }
 
-func (day) Part2(input []string, cont *fyne.Container) int {
+func part2(input []string) int {
 	count := 0
 	for i, l := range input {
 		for j := range l {
@@ -57,7 +65,7 @@ func (day) Part2(input []string, cont *fyne.Container) int {
 	return count
 }
 
-func (day) Input(filename string) []string {
+func input(filename string) []string {
 	out := []string{}
 	file, err := os.Open(filename)
 	if err != nil {
