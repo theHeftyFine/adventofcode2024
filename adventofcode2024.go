@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"strconv"
 
@@ -35,7 +34,7 @@ var screens = []*fyne.Container{
 	day9.Display("input/input9.txt"),
 	day10.Display("input/input10.txt"),
 	day11.Display("input/input11.txt"),
-	day12.Display("input/input12a.txt"),
+	day12.Display("input/input12.txt"),
 }
 
 func main() {
@@ -54,16 +53,6 @@ func main() {
 	rows := container.NewVBox(content)
 	w.SetContent(rows)
 
-	test := map[int]Test{}
-	test[1] = Test{3, "cheese", true}
-	fmt.Printf("%+v, %+v\n", test[0], test[1])
-
 	w.ShowAndRun()
 
-}
-
-type Test struct {
-	A   int
-	B   string
-	set bool
 }
